@@ -741,12 +741,42 @@ class SubscriptionConverter:
 
 		return config
 
-	def save_config(self, config: Dict[str, Any], filename: str, format_type: str):
+	def save_config(self, config: Dict[str, Any], filename: str, format_type: str, compact: bool = False):
 		"""保存配置文件"""
 		try:
 			if format_type.lower() == 'yaml':
 				with open(filename, 'w', encoding='utf-8') as f:
-					yaml.dump(config, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+					if not compact:
+						yaml.dump(config, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+					else:
+						proxies = config.pop("proxies", None)
+						proxygroups = config.pop("proxy-groups", None)
+						rules = config.pop("rules", None)
+
+						# 先把其它字段用正常 block style 序列化
+						head = yaml.dump(config, None, sort_keys=False, allow_unicode=True).rstrip()
+						proxygroups = yaml.dump(proxygroups, None, sort_keys=False, allow_unicode=True).rstrip()
+						rules = yaml.dump(rules, None, sort_keys=False, allow_unicode=True).rstrip()
+
+						# 构建 proxies 部分：每个 proxy 用 flow style mapping 单独一行
+						proxies_lines = ["proxies:"]
+						if proxies:
+							for p in proxies:
+								single = yaml.dump(p, None, default_flow_style=True, sort_keys=False, allow_unicode=True).strip().replace("\n", " ")
+								single = re.sub(r"\s+", " ", single)
+								proxies_lines.append(f"- {single}")
+						else:
+							proxies_lines.append("[]")  # 为空时保留空列表表示
+
+						# 合并：如果 head 非空，换行再添加 proxies；否则只返回 proxies 部分
+						if head:
+							lines = head + "\n"
+						else:
+							lines = ""
+
+						lines += "\n" + "\n".join(proxies_lines) + "\n\nproxy-groups:\n" + proxygroups + "\n\nrules:\n" + rules + "\n"
+						f.write(lines)
+
 			elif format_type.lower() == 'json':
 				with open(filename, 'w', encoding='utf-8') as f:
 					json.dump(config, f, ensure_ascii=False, indent=2)
@@ -760,7 +790,8 @@ class SubscriptionConverter:
 	def convert_subscription(self, url: str, output_format: str = 'clash',
 						   template: str = 'standard', output_file: str = None,
 						   filter_info: bool = True, compatible_mode: bool = True, limit: int = None,
-						   from_file: bool = False):
+						   from_file: bool = False,
+						   compact: bool = False):
 		"""转换订阅链接"""
 		try:
 			# 获取订阅内容
@@ -815,7 +846,7 @@ class SubscriptionConverter:
 					output_file = f"converted_config.{file_ext}"
 
 			# 保存配置
-			self.save_config(config, output_file, file_ext)
+			self.save_config(config, output_file, file_ext, compact)
 
 			# 显示统计信息
 			self.print_statistics()
@@ -904,6 +935,7 @@ def main():
 	parser.add_argument('--no-compatible', action='store_true', help='禁用兼容模式，保持原始协议')
 	parser.add_argument('--limit', type=int, help='限制节点数量（避免配置文件过大）')
 	parser.add_argument('--file', action='store_true', help='从本地文件读取节点内容')
+	parser.add_argument('-c', '--compact', action='store_true', help='yaml输出时每个 proxy 单独一行')
 
 	args = parser.parse_args()
 
@@ -948,13 +980,13 @@ def main():
 				output_file = args.output or f"test_compatible_config.{file_ext}"
 			else:
 				output_file = args.output or f"test_config.{file_ext}"
-			converter.save_config(config, output_file, file_ext)
+			converter.save_config(config, output_file, file_ext, args.compact)
 			converter.print_statistics()
 		else:
 			# 正常转换模式
 			# 处理兼容模式参数
 			compatible_mode = args.compatible and not args.no_compatible
-			converter.convert_subscription(args.url, args.format, args.template, args.output, not args.no_filter, compatible_mode, args.limit, args.file)
+			converter.convert_subscription(args.url, args.format, args.template, args.output, not args.no_filter, compatible_mode, args.limit, args.file, args.compact)
 
 	except KeyboardInterrupt:
 		print("\n❌ 用户中断操作")
