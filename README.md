@@ -79,6 +79,7 @@ python3 subscription_converter.py "你的订阅链接" -f v2ray -o v2ray_config.
 | `--no-compatible` | 禁用兼容模式，保持原始协议 | - |
 | `--limit` | 限制节点数量（避免配置文件过大） | 无限制 |
 | `--file` | 从本地文件读取节点内容 | - |
+| `-c, --compact` | yaml 输出时每个 proxy 单独一行 | - |
 
 ### 配置模板说明
 
@@ -129,7 +130,7 @@ trojan://password@server:port?params#name
 
 ### 示例1：基本转换
 ```bash
-python3 subscription_converter.py "https://example.com/subscribe" 
+python3 subscription_converter.py "https://example.com/subscribe"
 ```
 
 ### 示例2：生成高级Clash配置
@@ -236,9 +237,9 @@ MIT License
 
 **从v1.1版本开始，兼容模式默认启用**，这意味着：
 
-✅ **自动转换不支持的协议**：Hysteria2 → VMess  
-✅ **兼容所有Clash客户端**：包括旧版Clash X  
-✅ **无需手动指定参数**：直接运行即可使用  
+✅ **自动转换不支持的协议**：Hysteria2 → VMess
+✅ **兼容所有Clash客户端**：包括旧版Clash X
+✅ **无需手动指定参数**：直接运行即可使用
 
 ### Hysteria2协议兼容性
 
@@ -250,7 +251,7 @@ MIT License
    ```bash
    # 默认启用兼容模式，自动转换为VMess
    python3 subscription_converter.py "订阅链接" -o config.yaml
-   
+
    # 使用便捷脚本
    ./convert.sh "订阅链接" -o config.yaml
    ```
@@ -265,7 +266,7 @@ MIT License
    - [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev/releases) (推荐)
    - [ClashX Meta](https://github.com/MetaCubeX/ClashX.Meta/releases)
 
-详细的兼容性指南请查看 [COMPATIBILITY_GUIDE.md](COMPATIBILITY_GUIDE.md) 
+详细的兼容性指南请查看 [COMPATIBILITY_GUIDE.md](COMPATIBILITY_GUIDE.md)
 
 ## 📁 本地文件转换
 
@@ -311,9 +312,9 @@ python3 subscription_converter.py nodes.txt --file --limit 20 -o limited_config.
 
 **从v1.1版本开始，兼容模式默认启用**，这意味着：
 
-✅ **自动转换不支持的协议**：Hysteria2 → VMess  
-✅ **兼容所有Clash客户端**：包括旧版Clash X  
-✅ **无需手动指定参数**：直接运行即可使用  
+✅ **自动转换不支持的协议**：Hysteria2 → VMess
+✅ **兼容所有Clash客户端**：包括旧版Clash X
+✅ **无需手动指定参数**：直接运行即可使用
 
 ### Hysteria2协议兼容性
 
@@ -325,7 +326,7 @@ python3 subscription_converter.py nodes.txt --file --limit 20 -o limited_config.
    ```bash
    # 默认启用兼容模式，自动转换为VMess
    python3 subscription_converter.py "订阅链接" -o config.yaml
-   
+
    # 使用便捷脚本
    ./convert.sh "订阅链接" -o config.yaml
    ```
@@ -340,4 +341,4 @@ python3 subscription_converter.py nodes.txt --file --limit 20 -o limited_config.
    - [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev/releases) (推荐)
    - [ClashX Meta](https://github.com/MetaCubeX/ClashX.Meta/releases)
 
-详细的兼容性指南请查看 [COMPATIBILITY_GUIDE.md](COMPATIBILITY_GUIDE.md) 
+详细的兼容性指南请查看 [COMPATIBILITY_GUIDE.md](COMPATIBILITY_GUIDE.md)
