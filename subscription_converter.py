@@ -31,7 +31,7 @@ class SubscriptionConverter:
 	def fetch_subscription(self, url: str) -> str:
 		"""获取订阅内容"""
 		try:
-			print(f"正在获取订阅: {url}")
+			perr(f"正在获取订阅: {url}")
 
 			# 设置请求头
 			headers = {
@@ -41,31 +41,31 @@ class SubscriptionConverter:
 			req = urllib.request.Request(url, headers=headers)
 			with urllib.request.urlopen(req, timeout=30) as response:
 				content = response.read().decode('utf-8')
-				print(f"✅ 订阅获取成功，内容长度: {len(content)}")
+				perr(f"✅ 订阅获取成功，内容长度: {len(content)}")
 				return content
 
 		except (URLError, HTTPError) as e:
-			print(f"❌ 获取订阅失败: {e}")
+			perr(f"❌ 获取订阅失败: {e}")
 			raise
 		except Exception as e:
-			print(f"❌ 未知错误: {e}")
+			perr(f"❌ 未知错误: {e}")
 			raise
 
 	def read_local_file(self, file_path: str) -> str:
 		"""读取本地文件内容"""
 		try:
-			print(f"正在读取本地文件: {file_path}")
+			perr(f"正在读取本地文件: {file_path}")
 
 			with open(file_path, 'r', encoding='utf-8') as f:
 				content = f.read()
-				print(f"✅ 文件读取成功，内容长度: {len(content)}")
+				perr(f"✅ 文件读取成功，内容长度: {len(content)}")
 				return content
 
 		except FileNotFoundError:
-			print(f"❌ 文件不存在: {file_path}")
+			perr(f"❌ 文件不存在: {file_path}")
 			raise
 		except Exception as e:
-			print(f"❌ 读取文件失败: {e}")
+			perr(f"❌ 读取文件失败: {e}")
 			raise
 
 	def decode_base64_content(self, content: str) -> str:
@@ -73,10 +73,10 @@ class SubscriptionConverter:
 		try:
 			# 尝试直接解码
 			decoded = base64.b64decode(content).decode('utf-8')
-			print("✅ Base64解码成功")
+			perr("✅ Base64解码成功")
 			return decoded
 		except Exception as e:
-			print(f"⚠️  Base64解码失败，尝试作为纯文本处理: {e}")
+			perr(f"⚠️  Base64解码失败，尝试作为纯文本处理: {e}")
 			return content
 
 	def parse_hysteria2_url(self, url: str) -> Optional[Dict[str, Any]]:
@@ -143,7 +143,7 @@ class SubscriptionConverter:
 				} if config.get('net') == 'ws' else None
 			}
 		except Exception as e:
-			print(f"⚠️  VMess URL解析失败: {e}")
+			perr(f"⚠️  VMess URL解析失败: {e}")
 			return None
 
 	def parse_vless_url(self, url: str) -> Optional[Dict[str, Any]]:
@@ -185,7 +185,7 @@ class SubscriptionConverter:
 				} if param_dict.get('security') == 'reality' else None
 			}
 		except Exception as e:
-			print(f"⚠️  VLESS URL解析失败: {e}")
+			perr(f"⚠️  VLESS URL解析失败: {e}")
 			return None
 
 	def parse_ss_url(self, url: str) -> Optional[Dict[str, Any]]:
@@ -282,7 +282,7 @@ class SubscriptionConverter:
 				'udp': True
 			}
 		except Exception as e:
-			print(f"⚠️  SS URL解析失败: {e}")
+			perr(f"⚠️  SS URL解析失败: {e}")
 			return None
 
 	def parse_trojan_url(self, url: str) -> Optional[Dict[str, Any]]:
@@ -320,7 +320,7 @@ class SubscriptionConverter:
 				'sni': param_dict.get('sni', server)
 			}
 		except Exception as e:
-			print(f"⚠️  Trojan URL解析失败: {e}")
+			perr(f"⚠️  Trojan URL解析失败: {e}")
 			return None
 
 	def filter_info_nodes(self, proxies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -335,7 +335,7 @@ class SubscriptionConverter:
 			if not is_info_node:
 				filtered_proxies.append(proxy)
 			else:
-				print(f"🗑️  过滤信息节点: {proxy['name']}")
+				perr(f"🗑️  过滤信息节点: {proxy['name']}")
 
 		return filtered_proxies
 
@@ -349,14 +349,14 @@ class SubscriptionConverter:
 		# 按行分割
 		lines = decoded_content.strip().split('\n')
 
-		print(f"📋 开始解析 {len(lines)} 行内容")
+		perr(f"📋 开始解析 {len(lines)} 行内容")
 
 		for i, line in enumerate(lines, 1):
 			line = line.strip()
 			if not line:
 				continue
 
-			print(f"🔍 解析第 {i} 行: {line[:50]}...")
+			perr(f"🔍 解析第 {i} 行: {line[:50]}...")
 
 			proxy = None
 
@@ -372,16 +372,16 @@ class SubscriptionConverter:
 			elif line.startswith('trojan://'):
 				proxy = self.parse_trojan_url(line)
 			else:
-				print(f"⚠️  不支持的协议: {line[:20]}...")
+				perr(f"⚠️  不支持的协议: {line[:20]}...")
 				continue
 
 			if proxy:
 				proxies.append(proxy)
-				print(f"✅ 成功解析: {proxy['name']} ({proxy['type']})")
+				perr(f"✅ 成功解析: {proxy['name']} ({proxy['type']})")
 			else:
-				print(f"❌ 解析失败")
+				perr(f"❌ 解析失败")
 
-		print(f"🎉 总共解析成功 {len(proxies)} 个节点")
+		perr(f"🎉 总共解析成功 {len(proxies)} 个节点")
 		return proxies
 
 	def convert_hysteria2_to_vmess(self, proxies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -408,7 +408,7 @@ class SubscriptionConverter:
 					}
 				}
 				converted_proxies.append(vmess_proxy)
-				print(f"🔄 转换 Hysteria2 -> VMess: {proxy['name']}")
+				perr(f"🔄 转换 Hysteria2 -> VMess: {proxy['name']}")
 			else:
 				converted_proxies.append(proxy)
 
@@ -781,10 +781,10 @@ class SubscriptionConverter:
 				with open(filename, 'w', encoding='utf-8') as f:
 					json.dump(config, f, ensure_ascii=False, indent=2)
 
-			print(f"✅ 配置文件已保存: {filename}")
+			perr(f"✅ 配置文件已保存: {filename}")
 
 		except Exception as e:
-			print(f"❌ 保存配置文件失败: {e}")
+			perr(f"❌ 保存配置文件失败: {e}")
 			raise
 
 	def convert_subscription(self, url: str, output_format: str = 'clash',
@@ -804,7 +804,7 @@ class SubscriptionConverter:
 			self.proxies = self.parse_subscription_content(content)
 
 			if not self.proxies:
-				print("❌ 没有解析到任何有效的代理节点")
+				perr("❌ 没有解析到任何有效的代理节点")
 				return
 
 			# 过滤掉信息节点
@@ -813,16 +813,16 @@ class SubscriptionConverter:
 
 			# 兼容模式：转换Hysteria2节点为VMess格式
 			if compatible_mode:
-				print("🔧 启用兼容模式，转换不支持的协议...")
+				perr("🔧 启用兼容模式，转换不支持的协议...")
 				self.proxies = self.convert_hysteria2_to_vmess(self.proxies)
 
 			# 限制节点数量
 			if limit and len(self.proxies) > limit:
-				print(f"📊 限制节点数量为 {limit} 个（原有 {len(self.proxies)} 个）")
+				perr(f"📊 限制节点数量为 {limit} 个（原有 {len(self.proxies)} 个）")
 				self.proxies = self.proxies[:limit]
 
 			# 确保节点名称唯一
-			print("🔍 检查并修复重复的节点名称...")
+			perr("🔍 检查并修复重复的节点名称...")
 			self.proxies = self.ensure_unique_names(self.proxies)
 
 			# 生成配置
@@ -852,14 +852,14 @@ class SubscriptionConverter:
 			self.print_statistics()
 
 		except Exception as e:
-			print(f"❌ 转换失败: {e}")
+			perr(f"❌ 转换失败: {e}")
 			raise
 
 	def print_statistics(self):
 		"""打印统计信息"""
-		print("\n" + "="*50)
-		print("📊 转换统计信息")
-		print("="*50)
+		perr("\n" + "="*50)
+		perr("📊 转换统计信息")
+		perr("="*50)
 
 		# 按协议类型统计
 		protocol_count = {}
@@ -867,16 +867,16 @@ class SubscriptionConverter:
 			protocol = proxy['type']
 			protocol_count[protocol] = protocol_count.get(protocol, 0) + 1
 
-		print(f"总节点数: {len(self.proxies)}")
-		print("\n协议分布:")
+		perr(f"总节点数: {len(self.proxies)}")
+		perr("\n协议分布:")
 		for protocol, count in protocol_count.items():
-			print(f"  {protocol.upper()}: {count} 个")
+			perr(f"  {protocol.upper()}: {count} 个")
 
-		print("\n节点列表:")
+		perr("\n节点列表:")
 		for i, proxy in enumerate(self.proxies, 1):
-			print(f"  {i:2d}. {proxy['name']} ({proxy['type'].upper()}) - {proxy['server']}:{proxy['port']}")
+			perr(f"  {i:2d}. {proxy['name']} ({proxy['type'].upper()}) - {proxy['server']}:{proxy['port']}")
 
-		print("="*50)
+		perr("="*50)
 
 	def validate_and_fix_uuid(self, uuid_str: str) -> str:
 		"""验证并修复UUID格式"""
@@ -888,7 +888,7 @@ class SubscriptionConverter:
 
 		# 如果长度不是32位，生成新的UUID
 		if len(clean_uuid) != 32:
-			print(f"⚠️  UUID格式不正确: {uuid_str}，生成新UUID")
+			perr(f"⚠️  UUID格式不正确: {uuid_str}，生成新UUID")
 			return str(uuid.uuid4())
 
 		# 格式化为标准UUID格式
@@ -898,7 +898,7 @@ class SubscriptionConverter:
 			uuid.UUID(formatted_uuid)
 			return formatted_uuid
 		except ValueError:
-			print(f"⚠️  UUID格式不正确: {uuid_str}，生成新UUID")
+			perr(f"⚠️  UUID格式不正确: {uuid_str}，生成新UUID")
 			return str(uuid.uuid4())
 
 	def ensure_unique_names(self, proxies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -919,6 +919,9 @@ class SubscriptionConverter:
 			unique_proxies.append(proxy)
 
 		return unique_proxies
+
+def perr(msg: str):
+	print(msg, file=sys.stderr)
 
 def main():
 	"""主函数"""
@@ -948,7 +951,7 @@ def main():
 	try:
 		if args.test:
 			# 测试模式
-			print("🧪 测试模式：使用内置示例")
+			perr("🧪 测试模式：使用内置示例")
 			test_content = """aHlzdGVyaWEyOi8vNDJhY2EwNzAtNDllYy00MGMzLTg0OWYtYmRkZGRiMjc2MWZmQGRpd3U2NC5kaTVqaS5sYXQ6MjY1MDAvP2luc2VjdXJlPTEmc25pPWRpd3U2NC5kaTVqaS5sYXQjJUU3JUJFJThFJUU1JTlCJUJEDQpoeXN0ZXJpYTI6Ly80MmFjYTA3MC00OWVjLTQwYzMtODQ5Zi1iZGRkZGIyNzYxZmZAZGl3dTM0LmRpNWppLmxhdDoyNjcwMC8/aW5zZWN1cmU9MSZzbmk9ZGl3dTM0LmRpNWppLmxhdCMlRTklQTYlOTklRTYlQjglQUY="""
 
 			proxies = converter.parse_subscription_content(test_content)
@@ -963,7 +966,7 @@ def main():
 
 			# 兼容模式
 			if compatible_mode:
-				print("🔧 启用兼容模式，转换不支持的协议...")
+				perr("🔧 启用兼容模式，转换不支持的协议...")
 				converter.proxies = converter.convert_hysteria2_to_vmess(converter.proxies)
 
 			if args.format.lower() == 'clash':
@@ -989,10 +992,10 @@ def main():
 			converter.convert_subscription(args.url, args.format, args.template, args.output, not args.no_filter, compatible_mode, args.limit, args.file, args.compact)
 
 	except KeyboardInterrupt:
-		print("\n❌ 用户中断操作")
+		perr("\n❌ 用户中断操作")
 		sys.exit(1)
 	except Exception as e:
-		print(f"❌ 程序执行失败: {e}")
+		perr(f"❌ 程序执行失败: {e}")
 		sys.exit(1)
 
 if __name__ == "__main__":
